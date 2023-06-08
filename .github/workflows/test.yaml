@@ -1,0 +1,19 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: testing
+      uses: fnndsc/python-poetry
+      run: |
+        poetry install
+        poetry run pytest -vvv

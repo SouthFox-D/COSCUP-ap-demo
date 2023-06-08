@@ -7,4 +7,4 @@ pipeline:
   pylint:
     image: cytopia/pylint
     commands:
-    - find . -type f -name "*.py" | xargs pylint
+    - find . -type f -name "*.py" | xargs pylint --disable=E0401

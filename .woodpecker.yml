@@ -4,3 +4,7 @@ pipeline:
     commands:
     - poetry install
     - poetry run pytest -vvv
+  pylint:
+    image: cytopia/pylint
+    commands:
+    - find . -type f -name "*.py" | xargs pylint

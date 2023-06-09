@@ -13,6 +13,9 @@ from httpx import Headers
 
 @dataclass
 class SignedData:
+    """
+    Signature data
+    """
     method: str
     path: str
     signed_list: list
@@ -100,4 +103,3 @@ class HttpSignature:
                                      + signed_data.headers[signed_str])
 
         return "\n".join(signed_string)
-

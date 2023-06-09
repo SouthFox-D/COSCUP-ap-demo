@@ -4,9 +4,20 @@ Verify and build HTTP signatures
 """
 import base64
 
+from dataclasses import dataclass
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.PublicKey import RSA
+from httpx import Headers
+
+
+@dataclass
+class SignedData:
+    method: str
+    path: str
+    signed_list: list
+    body_digest: str | None
+    headers: Headers
 
 
 class HttpSignature:
@@ -72,24 +83,21 @@ class HttpSignature:
     @classmethod
     def build_signature_string(
             cls,
-            method : str,
-            path : str,
-            signed_headers : list,
-            body_digest : str | None,
-            headers,
+            signed_data: SignedData,
     ) -> str:
         """
         Build signature string
         """
         signed_string = []
-        for signed_header in signed_headers:
-            if signed_header == "(request-target)":
+        for signed_str in signed_data.signed_list:
+            if signed_str == "(request-target)":
                 signed_string.append("(request-target): "
-                                     + method.lower() + ' ' + path)
-            elif signed_header == "digest" and body_digest:
-                signed_string.append("digest: " + body_digest)
+                                     + signed_data.method.lower() + ' ' + signed_data.path)
+            elif signed_str == "digest" and signed_data.body_digest:
+                signed_string.append("digest: " + signed_data.body_digest)
             else:
-                signed_string.append(signed_header + ": "
-                                     + headers[signed_header])
+                signed_string.append(signed_str + ": "
+                                     + signed_data.headers[signed_str])
 
         return "\n".join(signed_string)
+

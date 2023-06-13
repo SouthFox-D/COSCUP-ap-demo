@@ -1,3 +1,4 @@
+"""Request checker"""
 from flask import Request, abort
 from demo.httpsig import HttpSignature
 
@@ -5,6 +6,7 @@ from demo.httpsig import HttpSignature
 def inbox_prechecker(
         request: Request,
 ) -> bool:
+    """Inbox request prechecker"""
     try:
         payload = request.headers
         parsec_signature = HttpSignature.parse_signature(

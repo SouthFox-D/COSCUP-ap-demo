@@ -1,0 +1,6 @@
+pipeline:
+  test:
+    image: fnndsc/python-poetry
+    commands:
+    - poetry install
+    - poetry run pytest -vvv

@@ -30,8 +30,8 @@ class HttpSignature:
     @classmethod
     def calculation_digest(
             cls,
-            body : bytes,
-            algorithm : str ="sha-256"
+            body: bytes,
+            algorithm: str ="sha-256"
     ) -> str:
         """
         Calculates the digest header value for a given HTTP body
@@ -48,8 +48,8 @@ class HttpSignature:
     @classmethod
     def verify_signature(
             cls,
-            signature_string : str,
-            signature : bytes,
+            signature_string: str,
+            signature: bytes,
             pubkey,
     ) -> bool:
         """
@@ -59,13 +59,13 @@ class HttpSignature:
         signer = PKCS1_v1_5.new(pubkey)
         digest = SHA256.new()
         digest.update(signature_string.encode("utf-8"))
-        return signer.verify(digest, signature)
+        return signer.verify(digest, signature) # pylint: disable=E1102
 
 
     @classmethod
     def parse_signature(
             cls,
-            signature : str
+            signature: str
     ) -> dict:
         """
         Parse signature string in headers

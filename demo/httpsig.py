@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.PublicKey import RSA
-from httpx import Headers
+from werkzeug.datastructures import Headers
 
 
 @dataclass

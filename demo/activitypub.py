@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ActivityPub settings, fetch & post"""
 import httpx
-import config
+from demo import config
 
 
 def fetch(

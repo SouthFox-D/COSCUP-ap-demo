@@ -24,11 +24,11 @@ def inbox_prechecker(
 
     try:
         pub_key = actor["publicKey"]["publicKeyPem"]
-    except json.JSONDecodeError:
-        raise ValueError
-    except KeyError:
+    except json.JSONDecodeError as exc:
+        raise ValueError from exc
+    except KeyError as exc:
         print("actore gone?")
-        raise KeyError
+        raise KeyError from exc
 
     sigdate = SignedData(
         method = request.method,

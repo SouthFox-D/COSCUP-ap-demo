@@ -1,3 +1,8 @@
+-"Store App settings"
+
+USER_AGENT = "COSCUP-demo"
+AP_CONTENT_TYPE = "application/activity+json"
+
 USERNAME = "foo"
 DOMAIN = "localhost"
 SCHEME = "http"

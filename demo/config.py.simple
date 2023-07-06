@@ -1,0 +1,5 @@
+USERNAME = "foo"
+DOMAIN = "localhost"
+SCHEME = "http"
+ID = f"{SCHEME}://{DOMAIN}/user/{USERNAME}"
+BASE_URL = f"{SCHEME}://{DOMAIN}/

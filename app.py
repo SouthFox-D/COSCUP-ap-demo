@@ -7,14 +7,15 @@ from demo import config
 
 app = Flask(__name__)
 
-def is_ap_requested(request: Request) -> bool:
-    accept_str = request.headers.get("accept")
+def is_ap_requested(ap_request: Request) -> bool:
+    """Check request accept headers."""
+    accept_str = ap_request.headers.get("accept")
     if accept_str is None:
         return False
-    for i in {
+    for i in [
         "application/activity+json",
         "application/ld+json",
-    }:
+    ]:
         if accept_str.startswith(i):
             return True
     return False

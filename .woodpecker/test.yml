@@ -3,4 +3,5 @@ pipeline:
     image: fnndsc/python-poetry
     commands:
     - poetry install
+    - mv demo/config.py.simple demo/config.py
     - poetry run pytest -vvv

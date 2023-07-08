@@ -4,6 +4,7 @@ pipeline:
     commands:
     - poetry add pylint
     - poetry install
+    - mv demo/config.py.simple demo/config.py
     - find . -type f -name "*.py" | xargs poetry run pylint --disable=E0401
   flake8:
     image: fnndsc/python-poetry

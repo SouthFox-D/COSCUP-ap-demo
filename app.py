@@ -36,6 +36,40 @@ def inbox():
     return "STUB"
 
 
+@app.route("/.well-known/nodeinfo")
+def well_known_nodeinfo() -> Response:
+    """Return nodeinfo path."""
+    return jsonify(
+        {
+            "links": [
+                {
+                    "rel": "http://nodeinfo.diaspora.software/ns/schema/2.0",
+                    "href": f"{config.BASE_URL}/nodeinfo/2.0",
+                }
+            ]
+        }
+    )
+
+
+@app.get("/nodeinfo/2.0")
+def nodeinfo() -> Response:
+    """Return nodeinfo."""
+    return jsonify(
+        {
+            "version": "2.0",
+            "software": {
+                "name": "COSCUP-demo",
+                "version": "0.0.1",
+            },
+            "protocols": ["activitypub"],
+            "services": {"inbound": [], "outbound": []},
+            "usage": {"users": {"total": 1}},
+            "openRegistrations": False,
+            "metadata": {},
+        },
+    )
+
+
 @app.route("/.well-known/webfinger")
 def wellknown_webfinger() -> Response:
     """Exposes servers WebFinger data."""

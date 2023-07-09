@@ -1,0 +1,49 @@
+#+title: Show
+
+** Nodeinfo
+#+begin_src python
+from flask import Flask, Response, jsonify
+from config import BASE_URL #http://coscup.localhost
+
+app = Flask(__name__)
+@app.route("/.well-known/nodeinfo")
+def well_known_nodeinfo() -> Response:
+    """Return nodeinfo path."""
+    return jsonify(
+        {
+            "links": [
+                {
+                    "rel": "http://nodeinfo.diaspora.software/ns/schema/2.0",
+                    "href": f"{BASE_URL}/nodeinfo/2.0",
+                }
+            ]
+        }
+    )
+
+@app.get("/nodeinfo/2.0")
+def nodeinfo() -> Response:
+    """Return nodeinfo."""
+    return jsonify(
+        {
+            "version": "2.0",
+            "software": {
+                "name": "COSCUP-demo",
+                "version": "0.0.1",
+            },
+            "protocols": ["activitypub"],
+            "services": {"inbound": [], "outbound": []},
+            "usage": {"users": {"total": 1}},
+            "openRegistrations": False,
+            "metadata": {},
+        },
+    )
+#+end_src
+
+#+begin_src restclient
+GET http://coscup.localhost/.well-known/nodeinfo
+#+end_src
+
+#+begin_src restclient
+GET http://coscup.localhost/nodeinfo/2.0
+#+end_src
+

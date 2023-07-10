@@ -47,3 +47,47 @@ GET http://coscup.localhost/.well-known/nodeinfo
 GET http://coscup.localhost/nodeinfo/2.0
 #+end_src
 
+** WebFinger
+#+begin_src python
+from flask import Flask, abort, request, Response, jsonify
+from config import USERNAME, DOMAIN, ID
+#USERNAME = "show"
+#DOMAIN = "coscup.localhost"
+#ID = f"http://{DOMAIN}/meow/{USERNAME}"
+
+@app.route("/.well-known/webfinger")
+def wellknown_webfinger() -> Response:
+    """Exposes servers WebFinger data."""
+    resource = request.args.get("resource")
+
+    if resource not in [f"acct:{USERNAME}@{DOMAIN}", config.ID]:
+        abort(404)
+
+    resp = jsonify(
+        {
+            "subject": f"acct:{config.USERNAME}@{config.DOMAIN}",
+            "aliases": [config.ID],
+            "links": [
+                {
+                    "rel": "http://webfinger.net/rel/profile-page",
+                    "type": "text/html",
+                    "href": config.ID,
+                },
+                {
+                    "rel": "self",
+                    "type": "application/activity+json",
+                    "href": config.ID,
+                },
+            ],
+        },
+    )
+    resp.headers["Access-Control-Allow-Origin"]  = "*"
+    resp.headers["Content-Type"] = "application/jrd+json; charset=utf-8"
+
+    return resp
+#+end_src
+
+
+#+begin_src restclient
+GET http://coscup.localhost/.well-known/webfinger?resource=acct:show@coscup.localhost
+#+end_src

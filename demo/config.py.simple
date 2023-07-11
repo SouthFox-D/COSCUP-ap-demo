@@ -1,4 +1,8 @@
 "Store App settings"
+from pathlib import Path
+
+_ROOT_DIR = Path().parent.resolve()
+KEY_PATH = _ROOT_DIR / "data" / "key.pem"
 
 USER_AGENT = "COSCUP-demo"
 AP_CONTENT_TYPE = "application/activity+json"

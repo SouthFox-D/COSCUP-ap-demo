@@ -13,7 +13,7 @@ def inbox_prechecker(
     payload = request.headers
     ap_body = request.data
     try:
-        parsec_signature = HttpSignature.parse_signature(
+        parsed_signature = HttpSignature.parse_signature(
             payload["signature"]
         )
     except KeyError:
@@ -33,16 +33,15 @@ def inbox_prechecker(
     sigdate = SignedData(
         method = request.method,
         path = request.path,
-        signed_list = parsec_signature["headers"],
+        signed_list = parsed_signature["headers"],
         body_digest = HttpSignature.calculation_digest(ap_body),
         headers = request.headers,
     )
 
     is_verify = HttpSignature.verify_signature(
         HttpSignature.build_signature_string(sigdate),
-        parsec_signature["signature"],
+        parsed_signature["signature"],
         pub_key,
     )
 
-    print(is_verify)
-    return True
+    return is_verify

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Something misc."""
-import click
 import sys
+import click
 
 from Crypto.PublicKey import RSA
 from demo import config

@@ -2,7 +2,6 @@
 """process Key."""
 from pathlib import Path
 from Crypto.PublicKey import RSA
-from demo.config import KEY_PATH
 
 
 def get_pubkey_as_pem(key_path: Path) -> str:

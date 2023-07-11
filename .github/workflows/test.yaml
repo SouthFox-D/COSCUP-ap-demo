@@ -31,4 +31,5 @@ jobs:
     - name: Test with pytest
       run: |
         mv demo/config.py.simple demo/config.py
+        mv test/test_key.pem data/key.pem
         pytest -vvv

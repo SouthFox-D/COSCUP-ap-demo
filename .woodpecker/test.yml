@@ -4,4 +4,5 @@ pipeline:
     commands:
     - poetry install
     - mv demo/config.py.simple demo/config.py
+    - mv test/test_key.pem data/key.pem
     - poetry run pytest -vvv

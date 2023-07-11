@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Creatr App"""
 from flask import Flask, Response, request, Request, abort, jsonify
+
 from demo.utils.checker import inbox_prechecker
+from demo.activitypub import ME
 from demo import config
 
 
-app = Flask(__name__)
+app = Flask(__name__,
+            static_folder="demo/static",)
 
 def is_ap_requested(ap_request: Request) -> bool:
     """Check request accept headers."""
@@ -98,5 +101,14 @@ def wellknown_webfinger() -> Response:
     )
     resp.headers["Access-Control-Allow-Origin"]  = "*"
     resp.headers["Content-Type"] = "application/jrd+json; charset=utf-8"
+
+    return resp
+
+
+@app.route(f"/meow/{config.USERNAME}")
+def locate_user() -> Response:
+    """Return user ActivityPub response."""
+    resp = jsonify(ME)
+    resp.headers["Content-Type"] = "application/activity+json"
 
     return resp

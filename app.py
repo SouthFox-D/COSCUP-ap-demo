@@ -105,7 +105,7 @@ def wellknown_webfinger() -> Response:
     return resp
 
 
-@app.route(f"/meow/{config.USERNAME}")
+@app.route(f"/user/{config.USERNAME}")
 def locate_user() -> Response:
     """Return user ActivityPub response."""
     resp = jsonify(ME)

@@ -1,6 +1,7 @@
 #+title: Show
 
-** Nodeinfo
+** 名正言顺
+*** Nodeinfo
 #+begin_src python
 from flask import Flask, Response, jsonify
 from config import BASE_URL #http://coscup.localhost
@@ -47,6 +48,77 @@ GET http://coscup.localhost/.well-known/nodeinfo
 GET http://coscup.localhost/nodeinfo/2.0
 #+end_src
 
+*** Actor
+#+begin_src python
+AS_CTX = "https://www.w3.org/ns/activitystreams"
+AS_PUBLIC = "https://www.w3.org/ns/activitystreams#Public"
+
+AS_EXTENDED_CTX = [
+    "https://www.w3.org/ns/activitystreams",
+    "https://w3id.org/security/v1",
+    {
+        # AS ext
+        "Hashtag": "as:Hashtag",
+        "sensitive": "as:sensitive",
+        "manuallyApprovesFollowers": "as:manuallyApprovesFollowers",
+        "alsoKnownAs": {"@id": "as:alsoKnownAs", "@type": "@id"},
+        "movedTo": {"@id": "as:movedTo", "@type": "@id"},
+        # toot
+        "toot": "http://joinmastodon.org/ns#",
+        "featured": {"@id": "toot:featured", "@type": "@id"},
+        "Emoji": "toot:Emoji",
+        "blurhash": "toot:blurhash",
+        "votersCount": "toot:votersCount",
+    },
+]
+
+ME = {
+    "@context": AS_EXTENDED_CTX,
+    "type": "Person",
+    "id": config.ID,
+    "following": config.BASE_URL + "/following",
+    "followers": config.BASE_URL + "/followers",
+    "featured": config.BASE_URL + "/featured",
+    "inbox": config.BASE_URL + "/inbox",
+    "outbox": config.BASE_URL + "/outbox",
+    "preferredUsername": config.USERNAME,
+    "name": config.NICKNAME,
+    "summary": config.ACTOR_SUMMARY,
+    "endpoints": {
+        "sharedInbox": config.BASE_URL + "/inbox",
+    },
+    "url": config.ID + "/",  # Important for Mastodon
+    "manuallyApprovesFollowers": False,
+    "attachment": [],
+    "icon": {
+        "mediaType": "image/png",
+        "type": "Image",
+        "url": config.AVATAR_URL,
+    },
+    "publicKey": {
+        "id": f"{config.ID}#main-key",
+        "owner": config.ID,
+        "publicKeyPem": get_pubkey_as_pem(config.KEY_PATH),
+    },
+    "tag": [],
+}
+#+end_src
+
+#+begin_src python
+@app.route(f"/user/{config.USERNAME}")
+def locate_user() -> Response:
+    """Return user ActivityPub response."""
+    resp = jsonify(ME)
+    resp.headers["Content-Type"] = "application/activity+json"
+
+    return resp
+#+end_src
+
+#+begin_src restclient
+GET http://coscup.localhost/user/show
+#+end_src
+
+
 ** WebFinger
 #+begin_src python
 from flask import Flask, abort, request, Response, jsonify
@@ -87,7 +159,117 @@ def wellknown_webfinger() -> Response:
     return resp
 #+end_src
 
-
 #+begin_src restclient
 GET http://coscup.localhost/.well-known/webfinger?resource=acct:show@coscup.localhost
 #+end_src
+
+
+** HTTP Signature
+
+other.localhost --Follow-> coscup.localhost
+
+#+NAME: payload_block
+#+begin_src json
+# request.data
+{
+   "@context": "https://www.w3.org/ns/activitystreams",
+   "id": "http://other.localhost/9ef8847d72434cff82254f36ff88e710",
+   "type": "Follow",
+   "actor": "http://other.localhost",
+   "object": "http://coscup.localhost/meow/show"
+}
+
+# request.data
+{
+   "host":"other.localhost",
+   "accept":"*/*",
+   "accept-encoding":"gzip, deflate, br",
+   "connection":"keep-alive",
+   "user-agent":"something/fediverse+app",
+   "content-type":"application/activity+json",
+   "content-length":"206",
+   "date":"Tue, 11 Jul 2023 04:21:11 GMT",
+   "digest":"SHA-256=WzNniTyRBcZpgK7a6zYJBgsdKIQmFEPPfysh/ZzKb2o=",
+   "signature":"keyId=\"http://other.localhost#main-key\",algorithm=\"rsa-sha256\",headers=\"(request-target) user-agent host date digest content-type\",signature=\"irioDQuhYstSvafpl6DW4d31wDPRiTv7MZGyBo3j4kkc2TrfOweH3WRMMnoaWwl4LAI2WYLoKefeQpOg7Rm7ZEffsoLOzZvgdWJBm8lnOEgieyy5l2Vq1mlcS2PRJCisYGdzAwFOBkcHk0WKAZXvs1ieRV34NHfM8JF+DjrCBTZ/U9LyxULBwC6tPQTh9tflCOwXZOzXUq17C+2Uzsr8h4tDHjbmrG7OAcvYiPeOUKaP+InoE6j9ViHllhidNCPL0y8b1c7c72ruN48kF42OfyfUeiuCcuLwdp8eYBlTdG/ZsT2YXyKruwim3tTD1TtyW4Vfll+F/4/1RfWHsc9LrQ==\""
+}
+#+end_src
+
+#+begin_src python
+def parse_signature(
+        signature: str
+) -> dict:
+    """Parse signature string in headers."""
+    detail = {}
+    for item in signature.split(','):
+        name, value = item.split('=', 1)
+        value = value.strip('"')
+        detail[name.lower()] = value
+    signature_details = {
+        "headers": detail["headers"].split(),
+        "signature": (detail["signature"]),
+        "algorithm": detail["algorithm"],
+        "keyid": detail["keyid"],
+    }
+    return signature_details
+#+end_src
+
+parse_signature(headers["signature"])
+#+begin_src json
+ {"algorithm": "rsa-sha256",
+  "headers": ["(request-target)", "user-agent", "host", "date", "digest", "content-type"],
+  "keyid": "http://other.localhost#main-key",
+  "signature": "irioDQuhYstSvafpl6DW4d31wDPRiTv7MZGyBo3j4kkc2TrfOweH3WRMMnoaWwl4LAI2WYLoKefeQpOg7Rm7ZEffsoLOzZvgdWJBm8lnOEgieyy5l2Vq1mlcS2PRJCisYGdzAwFOBkcHk0WKAZXvs1ieRV34NHfM8JF+DjrCBTZ/U9LyxULBwC6tPQTh9tflCOwXZOzXUq17C+2Uzsr8h4tDHjbmrG7OAcvYiPeOUKaP+InoE6j9ViHllhidNCPL0y8b1c7c72ruN48kF42OfyfUeiuCcuLwdp8eYBlTdG/ZsT2YXyKruwim3tTD1TtyW4Vfll+F/4/1RfWHsc9LrQ=="}
+#+end_src
+
+
+#+begin_src python
+import base64
+from Crypto.Hash import SHA256
+
+def calculate_digest(
+        payload: bytes,
+) -> str:
+    """Calculate digest for given HTTP payload."""
+    if "sha-256" == algorithm:
+        payload_digest = SHA256.new()
+        payload_digest.update(body)
+        return "SHA-256=" + \
+            base64.b64encode(body_digest.digest()).decode("utf-8")
+
+
+def build_signature_string(
+        method: str,
+        path: str,
+        sign_headers: list,
+        payload_digest: str | None,
+        headers,
+) -> str :
+    sign_str = []
+    for sign_header in sign_headers:
+        if sign_header == "(request-target)":
+            sign_str.append("(request-target): " + method.lower() + ' ' + path)
+        elif sign_header == "digest" and payload_digest:
+            sign_str.append("digest: " + payload_digest)
+        else:
+            sign_str.append(sign_header + ": " + headers[sign_header])
+    return "\n".join(sign_str)
+
+
+build_signature_string(
+    request.method  #"post"
+    request.path    #"/inbox"
+    parse_signature(headers["signature"])["headers"],
+    calculate_digest(request.data),
+    headers,
+)
+
+#+end_src
+
+#+begin_quote
+(request-target): post /inbox
+user-agent: something/fediverse+app
+host: other.localhost
+date: Tue, 11 Jul 2023 04:21:11 GMT
+digest: SHA-256=WzNniTyRBcZpgK7a6zYJBgsdKIQmFEPPfysh/ZzKb2o=
+content-type: application/activity+json
+#+end_quote
